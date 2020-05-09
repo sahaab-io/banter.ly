@@ -3,11 +3,9 @@ import dash_daq as daq
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-from waitress import serve
 
 from app import app
 from apps import new_app, loaded_app
-from config import Config
 from constants.div_properties import (
     ALIASES,
     CHILDREN,
@@ -475,7 +473,4 @@ for field in CUSTOMIZATION_FIELDS:
 
 
 if __name__ == "__main__":
-    if Config.FLASK_ENV == "development":
-        app.run_server(debug=True)
-    else:
-        serve(app.server, listen="*:" + Config.PORT)
+    app.run_server(debug=True)
