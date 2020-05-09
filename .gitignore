@@ -140,3 +140,6 @@ tmp/*
 # IDE specific stuff
 .idea
 .vscode
+
+# Deployment configuration
+.ebextensions

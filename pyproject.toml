@@ -12,7 +12,7 @@ documentation = ""
 keywords = ["Message Analysis", "Chat Analytics", "NLP", "Data Science"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "3.7.7"
 dash = "*"
 flask = "*"
 flask_assets = "*"
@@ -33,9 +33,7 @@ emoji = "*"
 networkx = "*"
 spacy = "*"
 nltk = "*"
-matplotlib = "*"
 wordcloud = "*"
-matplotlib-venn-wordcloud = "*"
 pillow = "*"
 profanity-check = "*"
 

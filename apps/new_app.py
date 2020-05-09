@@ -46,7 +46,13 @@ layout = html.Div(
     [
         dcc.Upload(
             id=UPLOAD,
-            children=html.Div(["Drag and Drop or ", html.A("Select a File")]),
+            children=html.Div(
+                [
+                    "Drag and Drop or ",
+                    html.A("Select a File"),
+                    "- note that processing may take as long as 2 minutes, or even longer",
+                ]
+            ),
             style={
                 "width": "100%",
                 "height": "60px",

@@ -12,6 +12,7 @@ from nltk.tokenize import word_tokenize
 from profanity_check import predict_prob as predict_prob_profane
 
 import constants.column_names as cn
+
 # from app import cache
 from constants.profanity_labels import CLEAN, QUESTIONABLE, PROFANE
 from constants.sentiment_labels import (
@@ -126,7 +127,7 @@ def __label_profanity(score: float) -> str:
     """
     if score <= 0.15:
         return CLEAN
-    elif score < 0.2:
+    elif score < 0.3:
         return QUESTIONABLE
     else:
         return PROFANE

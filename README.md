@@ -3,7 +3,7 @@
   <h1><a href="">Banter.ly</a></h1>
 </div>
 
-![Python](https://img.shields.io/badge/Python-^3.8-yellow.svg?logo=python&longCache=true&logoColor=white&colorB=3774ac&style=flat-square&colorA=4c566a)
+![Python](https://img.shields.io/badge/Python-3.7.7-yellow.svg?logo=python&longCache=true&logoColor=white&colorB=3774ac&style=flat-square&colorA=4c566a)
 ![Dash](https://img.shields.io/badge/Dash-v1.12.0-blue.svg?longCache=true&logo=python&longCache=true&style=flat-square&logoColor=white&colorB=3774ac&colorA=4c566a)
 
 Banter.ly's goal is simply to be _the world's most comprehensive open source chat analytics 🔎 and visualization app 📊_
@@ -23,7 +23,7 @@ Banter.ly is built on top of [Dash](https://plotly.com/dash/), which provides a 
 
 ### Prerequisites
 
-- [Python](https://www.python.org/downloads/)
+- [Python 3.7.7](https://www.python.org/downloads/release/python-377/)
 - [MongoDB](https://mongodb.com) running locally or one their free hosts
 
 ### Running the App
@@ -36,7 +36,7 @@ curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poet
 git clone https://github.com/sahaab-io/banter.ly.git && cd banter.ly
 
 # create and activate the virtualenv + install dependencies
-poetry install && poetry update
+poetry install
 
 # run the one-time setup script and download Spacy data
 python setup.py && python -m spacy download en_core_web_sm
@@ -49,5 +49,5 @@ If you don't wish to use [`Poetry`](https://python-poetry.org/) as your package 
 
 ## Acknowledgements
 
-* Icons made by [Freepik](https://www.flaticon.com/authors/freepik) from [Flaticon](www.flaticon.com) 
 * [NRC Emotional Lexicon](https://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm)
+* Icons made by [Freepik](https://www.flaticon.com/authors/freepik) from [Flaticon](www.flaticon.com) 

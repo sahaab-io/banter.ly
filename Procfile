@@ -1,1 +1,0 @@
-web: python -m spacy download en_core_web_sm; python setup.py; waitress-serve --port=$PORT index:app.server
