@@ -1,4 +1,8 @@
 """The main dash flask application and it's components"""
+import logging
+import os
+from logging.handlers import RotatingFileHandler
+
 import dash
 from pymongo import MongoClient
 
@@ -38,8 +42,27 @@ app.title = "Banter.ly"
 server = app.server
 server.config.from_object(Config)
 app.config.suppress_callback_exceptions = True
+# Configure the logging in production (assuming Heroku environment)
+if Config.LOG_TO_STDOUT:
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+    server.logger.addHandler(stream_handler)
+else:
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
+    file_handler = RotatingFileHandler('logs/banterly.log',
+                                       maxBytes=10240, backupCount=10)
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s %(levelname)s: %(message)s '
+        '[in %(pathname)s:%(lineno)d]'))
+    file_handler.setLevel(logging.INFO)
+    server.logger.addHandler(file_handler)
 
-db = MongoClient(Config.DB_URL).test_database
+server.logger.setLevel(logging.INFO)
+server.logger.info('Banter.ly startup')
+
+# Create the DB Client (and DB if it doesn't exist)
+db = MongoClient(Config.DB_URL).banterly_main
 
 # Initialize the cache
 # if Config.CACHE_TYPE == 'redis':

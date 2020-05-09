@@ -478,4 +478,4 @@ if __name__ == "__main__":
     if Config.FLASK_ENV == "development":
         app.run_server(debug=True)
     else:
-        serve(app.server, listen="*:8080")
+        serve(app.server, listen="*:" + Config.PORT)

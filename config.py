@@ -28,3 +28,7 @@ class Config:
     AWS_SECRET_ACCESS_KEY = environ.get("AWS_SECRET_ACCESS_KEY")
     PERMANENT_BUCKET_PATH = environ.get("PERMANENT_BUCKET_PATH")
     TEMP_BUCKET_PATH = environ.get("TEMP_BUCKET_PATH")
+
+    # Heroku Deployment Config
+    LOG_TO_STDOUT = environ.get("LOG_TO_STDOUT")
+    PORT = environ.get("PORT")
