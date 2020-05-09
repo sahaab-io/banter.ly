@@ -38,7 +38,6 @@ wordcloud = "*"
 matplotlib-venn-wordcloud = "*"
 pillow = "*"
 profanity-check = "*"
-en_core_web_sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.5/en_core_web_sm-2.2.5.tar.gz" }
 
 [tool.poetry.dev-dependencies]
 pytest = "*"

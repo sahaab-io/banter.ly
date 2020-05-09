@@ -32,3 +32,6 @@ class Config:
     # Heroku Deployment Config
     LOG_TO_STDOUT = environ.get("LOG_TO_STDOUT")
     PORT = environ.get("PORT")
+
+    # Other config
+    VERSION = environ.get("VERSION")

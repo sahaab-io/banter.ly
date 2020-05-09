@@ -6,6 +6,7 @@ from dash.exceptions import PreventUpdate
 
 from app import app
 from apps import new_app, loaded_app
+from config import Config
 from constants.div_properties import (
     ALIASES,
     CHILDREN,
@@ -149,7 +150,8 @@ privacy_notice_layout = html.Details(
         ---
         We do not collect or store any data beyond what's required to produce these graphs,
         and even that's stored encrypted and deleted after *72 hours*. The source code is public, so you can check
-        for yourself (not that you can see the bucket configuration, so I guess you'll just have to trust us).
+        for yourself (not that you can see the bucket configuration, so I guess you'll just have to trust us). If you 
+        want to be super cautious, you can simply run Banter.ly locally on your machine.
         """
         ),
         html.P(
@@ -229,6 +231,8 @@ app.layout = html.Div(
                     title="Star on GitHub",
                     className=HOVER_BOB,
                 ),
+                html.Br(),
+                html.P([html.Em("v" + Config.VERSION)]),
                 html.Br(),
                 html.H2(
                     [
@@ -347,7 +351,7 @@ def update_chat_count(_, new_data):
     [Input(MESSAGE_COUNT_MEMORY, DATA)],
     [State(MESSAGE_COUNT_MEMORY, DATA)],
 )
-def update_chat_count(_, new_data):
+def update_message_count(_, new_data):
     data = new_data or {}
     return data.get(MESSAGE_COUNT, get_message_count())
 
