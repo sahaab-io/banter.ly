@@ -1,5 +1,5 @@
 <div align="center">
-  <img alt="Banter.ly Logo" src="assets/logo.png" width="300px">
+  <img alt="Banter.ly Logo" src="assets/logo.png" width="250px">
   <h1><a href="">Banter.ly</a></h1>
 </div>
 
