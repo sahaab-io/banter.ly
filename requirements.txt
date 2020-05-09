@@ -109,7 +109,6 @@ docutils==0.15.2 \
     --hash=sha256:a2aeea129088da402665e92e0b25b04b073c04b2dce4ab65caaa38b7ce2e1a99
 emoji==0.5.4 \
     --hash=sha256:60652d3a2dcee5b8af8acb097c31776fb6d808027aeb7221830f72cdafefc174
-https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.5/en_core_web_sm-2.2.5.tar.gz
 flask==1.1.2 \
     --hash=sha256:8a4fdd8936eba2512e9c85df320a37e694c93945b33ef33c89946a340a238557 \
     --hash=sha256:4efa1ae2d7c9865af48986de8aeb8504bf32c7f3d6fdc9353d34b21f4b127060
