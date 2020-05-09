@@ -12,7 +12,7 @@ documentation = ""
 keywords = ["Message Analysis", "Chat Analytics", "NLP", "Data Science"]
 
 [tool.poetry.dependencies]
-python = "3.7.7"
+python = "^3.7"
 dash = "*"
 flask = "*"
 flask_assets = "*"
