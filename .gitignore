@@ -127,3 +127,16 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Project specific ignores
+scratch.py
+cache
+app.db
+
+# Ignore the tmp folder except for the .gitkeep file, because the folder still needs to be there for saving csvs locally
+tmp/*
+!tmp/.gitkeep
+
+# IDE specific stuff
+.idea
+.vscode

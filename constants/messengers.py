@@ -1,0 +1,3 @@
+"""Supported Messengers"""
+
+WHATSAPP = "whatsapp"

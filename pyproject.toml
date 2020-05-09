@@ -1,0 +1,69 @@
+[tool.poetry]
+name = "Banter.ly"
+version = "0.1.0"
+description = "The most comprehensive open source chat analytics and visualization app"
+authors = ["Amir Abushanab <amirwuzhere@hotmail.com>"]
+maintainers = ["Amir Abushanab <amirwuzhere@hotmail.com>"]
+license = "MIT"
+readme = "README.rst"
+homepage = "https://hackersandslackers.com/plotly-dash-with-flask/"
+repository = "https://github.com/sahaab-io/banter.ly"
+documentation = ""
+keywords = ["Message Analysis", "Chat Analytics", "NLP", "Data Science"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+dash = "*"
+flask = "*"
+flask_assets = "*"
+#flask_caching = "*"
+pymongo = "*"
+dnspython= "*"
+#redis = "*"
+dash_Table = "*"
+dash_core_components = "*"
+dash_html_components = "*"
+dash-renderer = "*"
+dash-daq = "*"
+pandas = "*"
+python-dotenv = "*"
+waitress = "*"
+smart_open = "*"
+emoji = "*"
+networkx = "*"
+spacy = "*"
+nltk = "*"
+matplotlib = "*"
+wordcloud = "*"
+matplotlib-venn-wordcloud = "*"
+pillow = "*"
+profanity-check = "*"
+en_core_web_sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.5/en_core_web_sm-2.2.5.tar.gz" }
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pygments = "*"
+black = { version = "*", allow-prereleases = true }
+pre-commit = { version = "*", allow-prereleases = true }
+
+[build-system]
+requires = ["poetry>=1.0.5"]
+build-backend = "poetry.masonry.api"
+
+#[tool.poetry.scripts]
+#setup = "python -m nltk.downloader punkt stopwords wordnet vader_lexicon"
+#start = "gunicorn index:server"
+
+[tool.poetry.urls]
+issues = "https://github.com/sahaab-io/banter.ly/issues"
+
+[tool.black]
+line-length = 79
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | cache
+)/
+'''
