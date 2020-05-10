@@ -10,6 +10,8 @@ Banter.ly's goal is simply to be _the world's most comprehensive open source cha
 
 We want to make it easy and safe for anyone to get the most advanced insights from their text conversations with the click of a button
 
+See a live demo [here](http://34.105.74.179:8080/)
+
 ## Features
 Banter.ly currently only supports Whatsapp chat exports - more messengers and formats are on the [roadmap](https://github.com/sahaab-io/banter.ly/projects/2) (feature requests and cool ideas are welcome!)
 
