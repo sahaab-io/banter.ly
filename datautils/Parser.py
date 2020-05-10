@@ -64,15 +64,38 @@ class Parser:
 
             # Case 1 example: "[2020-04-15, 11:04:12 PM] Amir: Plz"
             # Case 2 example: "2020-04-16, 00:04 - Laila El-Farawi: Loool"
+            # Case 3 example: "2017-03-24, 4:57 p.m. - Sami: same"
             # todo: implement stricter checking to prevent cases with phone numbers or postal codes
-            is_ios_message = line[0] == "["
-            is_android_message = line[0:4].isdigit() and line[4] == "-"
-            if is_ios_message or is_android_message:
+            is_android_message_12 = (
+                line[0:4].isdigit() and line[4] == "-"
+            ) and (" p.m. - " in line[:27] or " a.m. - " in line[:27])
+
+            is_android_message_24 = (
+                line[0:4].isdigit()
+                and line[4] == "-"
+                and not (" p.m. - " in line[:27] or " a.m. - " in line[:27])
+            )
+
+            is_ios_message_12 = line[0] == "[" and (
+                "PM" in line[:27] or "AM" in line[:27]
+            )
+
+            if (
+                is_ios_message_12
+                or is_android_message_12
+                or is_android_message_24
+            ):
                 # Set the indices
-                if is_ios_message:
+                if is_ios_message_12:
                     first_name_start = 26
-                elif is_android_message:
+                elif is_android_message_12:
+                    if line[24] == " ":
+                        first_name_start = 25
+                    else:
+                        first_name_start = 24
+                elif is_android_message_24:
                     first_name_start = 20
+
                 last_name_end = line.index(": ", first_name_start) + 2
 
                 # Skip the lines with media causing issues and tally them
@@ -86,28 +109,39 @@ class Parser:
                     d.append(entry)
 
                 # Set the sender
-                if is_ios_message:
+                if is_ios_message_12:
                     if line[first_name_start - 2] == "]":
                         first_name_start += 1
                     sender = self.__extract_firstname(
                         line, first_name_start - 1
                     )
-                if is_android_message:
+                elif is_android_message_12 or is_android_message_24:
                     sender = self.__extract_firstname(line, first_name_start)
 
-                # Extract the timestamp
-                if is_ios_message:
-                    # print(line[first_name_start-1])
-                    if line[first_name_start - 2] == "]":
-                        first_name_start += 1
-                    time = datetime.datetime.strptime(
-                        line[0 : first_name_start - 2],
-                        "[%Y-%m-%d, %I:%M:%S %p]",
-                    )
-                elif is_android_message:
-                    time = datetime.datetime.strptime(
-                        line[0 : first_name_start - 3], "%Y-%m-%d, %H:%M"
-                    )
+                # Extract the timestamp. The try catch is to account for the case where you copy pasted a message or the
+                # rare case where the message starts with a morphed timestamp
+                try:
+                    if is_ios_message_12:
+                        # print(line[first_name_start-1])
+                        if line[first_name_start - 2] == "]":
+                            first_name_start += 1
+                        time = datetime.datetime.strptime(
+                            line[0 : first_name_start - 2],
+                            "[%Y-%m-%d, %I:%M:%S %p]",
+                        )
+                    elif is_android_message_12:
+                        l = line[0 : first_name_start - 3].replace(".", "")
+                        time = datetime.datetime.strptime(
+                            line[0 : first_name_start - 3].replace(".", ""),
+                            "%Y-%m-%d, %I:%M %p",
+                        )
+                    elif is_android_message_24:
+                        time = datetime.datetime.strptime(
+                            line[0 : first_name_start - 3], "%Y-%m-%d, %H:%M"
+                        )
+                except ValueError:
+                    entry[RAW_TEXT] = entry[RAW_TEXT] + line
+                    continue
 
                 # Extract the text and create the data entry
                 text = line[last_name_end : len(line)]

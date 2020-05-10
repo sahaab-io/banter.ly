@@ -38,6 +38,9 @@ git clone https://github.com/sahaab-io/banter.ly.git && cd banter.ly
 # create and activate the virtualenv + install dependencies
 poetry install
 
+# create a .env file with your configuration (you can just rename the example to get started locally)
+cp .env.example .env
+
 # run the one-time setup script and download Spacy data
 python setup.py && python -m spacy download en_core_web_sm
 

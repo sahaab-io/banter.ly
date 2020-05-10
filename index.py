@@ -193,6 +193,7 @@ app.layout = html.Div(
     id=DARK_THEME_CONTAINER,
     children=[
         dcc.Store(id=CHAT_COUNT_MEMORY, storage_type="local"),
+        dcc.Store(id=MESSAGE_COUNT_MEMORY, storage_type="local"),
         html.Header(
             className="container",
             style={"text-align": "center"},

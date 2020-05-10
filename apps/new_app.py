@@ -48,9 +48,9 @@ layout = html.Div(
             id=UPLOAD,
             children=html.Div(
                 [
-                    "Drag and Drop or ",
-                    html.A("Select a File"),
-                    "- note that processing may take as long as 2 minutes, or even longer",
+                    "Drag and drop or ",
+                    html.A("select a file"),
+                    " - note that processing may take as long as 2 minutes, or even longer",
                 ]
             ),
             style={
