@@ -85,81 +85,90 @@ layout = html.Div(
     ],
 )
 def generate_graphs(contents, dark_theme, customization, research_consent):
-    if contents is not None:
-        content_type, content_string = contents.split(",")
-        if "text" in content_type:
-            raw_text = io.StringIO(
-                base64.b64decode(content_string).decode("utf-8")
-            ).getvalue()
+    try:
+        if contents is not None:
+            content_type, content_string = contents.split(",")
+            if "text" in content_type:
+                raw_text = io.StringIO(
+                    base64.b64decode(content_string).decode("utf-8")
+                ).getvalue()
 
-            # Process the uploaded data and generate the new columns
-            parser.parse(raw_text)
+                # Process the uploaded data and generate the new columns
+                parser.parse(raw_text)
+                # Check that the graph configuration matches the number of participants in the convo
+                alias_color_map = None
+                if customization:
+                    participant_alias_map = customization[PARTICIPANTS_ALIASES]
+                    if len(participant_alias_map) != len(parser.participants):
+                        return html.Div(
+                            className="container error-container",
+                            children=[
+                                html.H3("❗"),
+                                html.H6(
+                                    "There are {} participants in this chat but the customization was set"
+                                    "for only {}".format(
+                                        len(parser.participants),
+                                        len(participant_alias_map),
+                                    )
+                                ),
+                                html.P("Try clearing the graph customization"),
+                            ],
+                        )
+                    else:
+                        # Update the parsed dataframe with the aliases
+                        parser.set_customization(participant_alias_map)
+                        alias_color_map = customization[ALIASES_COLORS]
 
-            # Check that the graph configuration matches the number of participants in the convo
-            alias_color_map = None
-            if customization:
-                participant_alias_map = customization[PARTICIPANTS_ALIASES]
-                if len(participant_alias_map) != len(parser.participants):
-                    return html.Div(
-                        className="container error-container",
-                        children=[
-                            html.H3("❗"),
-                            html.H6(
-                                "There are {} participants in this chat but the customization was set"
-                                "for only {}".format(
-                                    len(parser.participants),
-                                    len(participant_alias_map),
-                                )
-                            ),
-                            html.P("Try clearing the graph customization"),
-                        ],
-                    )
-                else:
-                    # Update the parsed dataframe with the aliases
-                    parser.set_customization(participant_alias_map)
-                    alias_color_map = customization[ALIASES_COLORS]
+                # Run the processor and generate the new dataframe columns, and get back
+                # an array of dataframes corresponding to each person in the chat
+                # note that because this function is memoized you need to return a new df
+                df, dfs, _ = process_data(parser.parsed_df)
+                parser.parsed_df = df
 
-            # Run the processor and generate the new dataframe columns, and get back
-            # an array of dataframes corresponding to each person in the chat
-            # note that because this function is memoized you need to return a new df
-            df, dfs, _ = process_data(parser.parsed_df)
-            parser.parsed_df = df
+                # Store a copy of the processed data in the bucket if the user has consented
+                if len(research_consent) > 0:
+                    parser.save_data(alias_color_map, True)
 
-            # Store a copy of the processed data in the bucket if the user has consented
-            if len(research_consent) > 0:
-                parser.save_data(alias_color_map, True)
+                # Update the Graph class with the data and set the default graph template
+                g.df = parser.parsed_df
+                g.dfs = dfs
+                g.participants = parser.participants
+                g.media_counter = parser.media_count_map
 
-            # Update the Graph class with the data and set the default graph template
-            g.df = parser.parsed_df
-            g.dfs = dfs
-            g.participants = parser.participants
-            g.media_counter = parser.media_count_map
+                if alias_color_map:
+                    g.color_map = alias_color_map
 
-            if alias_color_map:
-                g.color_map = alias_color_map
-
-            # Create the final layout with Dash Graphs
-            return html.Div(
-                [
-                    html.Div(
-                        className="container",
-                        style={
-                            "text-align": "center",
-                            "margin-bottom": "30px",
-                        },
-                        children=[
-                            html.Button(
-                                "Share Results",
-                                id=SHARE_BUTTON,
-                                n_clicks=0,
-                                style={COLOR: BLUE},
-                            ),
-                            html.Div(id=SHARE_URL, style={COLOR: BLUE}),
-                        ],
-                    ),
-                    layout_graphs(g, dark_theme),
-                ]
-            )
+                # Create the final layout with Dash Graphs
+                return html.Div(
+                    [
+                        html.Div(
+                            className="container",
+                            style={
+                                "text-align": "center",
+                                "margin-bottom": "30px",
+                            },
+                            children=[
+                                html.Button(
+                                    "Share Results",
+                                    id=SHARE_BUTTON,
+                                    n_clicks=0,
+                                    style={COLOR: BLUE},
+                                ),
+                                html.Div(id=SHARE_URL, style={COLOR: BLUE}),
+                            ],
+                        ),
+                        layout_graphs(g, dark_theme),
+                    ]
+                )
+    except Exception as e:
+        return html.Div(
+            className="container error-container",
+            children=[
+                html.H3("❗"),
+                html.H6("An error occurred while parsing your file"),
+                html.P(str(e)),
+            ],
+        )
 
 
 @app.callback(Output(CHAT_COUNT_MEMORY, DATA), [Input(UPLOAD, CONTENTS)])
