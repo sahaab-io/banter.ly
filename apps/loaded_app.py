@@ -9,7 +9,8 @@ from constants.database_keys import COLOR_MAP, MEDIA_COUNTER, URI
 from constants.div_properties import CHILDREN, DAQ_THEME, CIRCLE, VALUE
 from datautils.Parser import Parser
 from graphs.Graph import Graph
-from graphs.layout import layout_graphs
+from layouts.graph_layout import graph_layout
+from layouts.error_layout import error_layout
 from services.processed_data_service import get_processed_data
 
 CIRCLE_LOADING_2 = "circle-loading-2"
@@ -30,18 +31,6 @@ layout = html.Div(
     ]
 )
 
-error_layout = html.Div(
-    className="container error-container",
-    children=[
-        html.H1("❗"),
-        html.H3("Analysis Not Found"),
-        html.H6(
-            "the url you entered is either incorrect or the data has expired"
-        ),
-        dcc.Link("Start another analysis", href="/"),
-    ],
-)
-
 
 @app.callback(
     Output(LOADED_CONTENT, CHILDREN),
@@ -52,7 +41,15 @@ def display_loaded_page(search, dark_theme):
     try:
         oid = ObjectId(uid)
     except InvalidId:
-        return error_layout
+        return html.Div(
+            [
+                error_layout(
+                    "Analysis Not Found",
+                    "the url you entered is either incorrect or the data has expired",
+                ),
+                dcc.Link("Start another analysis", href="/"),
+            ]
+        )
     processed_data = get_processed_data(oid)
     if processed_data:
         p = Parser()
@@ -68,6 +65,6 @@ def display_loaded_page(search, dark_theme):
         g.media_counter = processed_data[MEDIA_COUNTER]
 
         # Create the final layout with Dash Graphs
-        return layout_graphs(g, dark_theme)
+        return graph_layout(g, dark_theme)
     else:
         return error_layout

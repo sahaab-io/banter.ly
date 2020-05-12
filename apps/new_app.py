@@ -27,7 +27,8 @@ from constants.styling import BLUE
 from datautils.Parser import Parser
 from datautils.processor import process_data
 from graphs.Graph import Graph
-from graphs.layout import layout_graphs
+from layouts.graph_layout import graph_layout
+from layouts.error_layout import error_layout
 from services.counter_service import get_chat_count, get_message_count
 
 CIRCLE_LOADING = "circle-loading"
@@ -100,19 +101,13 @@ def generate_graphs(contents, dark_theme, customization, research_consent):
                 if customization:
                     participant_alias_map = customization[PARTICIPANTS_ALIASES]
                     if len(participant_alias_map) != len(parser.participants):
-                        return html.Div(
-                            className="container error-container",
-                            children=[
-                                html.H3("❗"),
-                                html.H6(
-                                    "There are {} participants in this chat but the customization was set"
-                                    "for only {}".format(
-                                        len(parser.participants),
-                                        len(participant_alias_map),
-                                    )
-                                ),
-                                html.P("Try clearing the graph customization"),
-                            ],
+                        return error_layout(
+                            "There are {} participants in this chat but the customization was set"
+                            "for only {}".format(
+                                len(parser.participants),
+                                len(participant_alias_map),
+                            ),
+                            "Try clearing the graph customization",
                         )
                     else:
                         # Update the parsed dataframe with the aliases
@@ -157,18 +152,11 @@ def generate_graphs(contents, dark_theme, customization, research_consent):
                                 html.Div(id=SHARE_URL, style={COLOR: BLUE}),
                             ],
                         ),
-                        layout_graphs(g, dark_theme),
+                        graph_layout(g, dark_theme),
                     ]
                 )
     except Exception as e:
-        return html.Div(
-            className="container error-container",
-            children=[
-                html.H3("❗"),
-                html.H6("An error occurred while parsing your file"),
-                html.P(str(e)),
-            ],
-        )
+        return error_layout("An un expected error occurred", str(e))
 
 
 @app.callback(Output(CHAT_COUNT_MEMORY, DATA), [Input(UPLOAD, CONTENTS)])

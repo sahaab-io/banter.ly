@@ -29,6 +29,7 @@ from constants.div_properties import (
     ALIASES_COLORS,
 )
 from constants.styling import BLUE, GREEN
+from layouts.error_layout import error_layout
 from services.counter_service import get_chat_count, get_message_count
 from utils import is_hex_color
 
@@ -397,30 +398,16 @@ def validate_customization(n_clicks, participants, aliases, colors):
                 len(participant_list) == len(alias_list)
                 and len(participant_list) == len(alias_list)
             ):
-                return html.Div(
-                    className="container error-container",
-                    children=[
-                        html.H3("❗"),
-                        html.H6(
-                            "Number of settings in each list is not equal"
-                        ),
-                        html.P(
-                            "Make sure the length of each list is the same"
-                        ),
-                    ],
+                return error_layout(
+                    "Number of settings in each list is not equal",
+                    "Make sure the length of each list is the same",
                 )
 
             for color in color_list:
                 if not is_hex_color(color):
-                    return html.Div(
-                        className="container error-container",
-                        children=[
-                            html.H3("❗"),
-                            html.H6("Invalid Color"),
-                            html.P(
-                                "Please use a valid hex color (including the #) - use the color picker!"
-                            ),
-                        ],
+                    return error_layout(
+                        "Invalid Color",
+                        "Please use a valid hex color (including the #) - use the color picker!",
                     )
 
             return [
