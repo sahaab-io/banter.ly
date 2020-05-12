@@ -209,36 +209,39 @@ class Parser:
     @staticmethod
     def __extract_date_format(message: str) -> str:
         # todo: implement stricter checking to prevent cases with phone numbers or postal codes
-        if (message[0:4].isdigit() and message[4] == "-") and (
-            " p.m. - " in message[:27] or " a.m. - " in message[:27]
-        ):
-            return IS_DASHED_Y_M_D_12
+        try:
+            if (message[0:4].isdigit() and message[4] == "-") and (
+                " p.m. - " in message[:27] or " a.m. - " in message[:27]
+            ):
+                return IS_DASHED_Y_M_D_12
 
-        if (message[0:4].isdigit() and message[4] == "-") and not (
-            " p.m. - " in message[:27] or " a.m. - " in message[:27]
-        ):
-            return IS_DASHED_Y_M_D_24
+            if (message[0:4].isdigit() and message[4] == "-") and not (
+                " p.m. - " in message[:27] or " a.m. - " in message[:27]
+            ):
+                return IS_DASHED_Y_M_D_24
 
-        if (
-            message[0] == "["
-            and ("PM" in message[:27] or "AM" in message[:27])
-            and "/" not in message[:27]
-        ):
-            return IS_SQUARE_BRACKET_Y_M_D_12
+            if (
+                message[0] == "["
+                and ("PM" in message[:27] or "AM" in message[:27])
+                and "/" not in message[:27]
+            ):
+                return IS_SQUARE_BRACKET_Y_M_D_12
 
-        if (
-            message[0] != "["
-            and (message[1] == "/" or message[2] == "/")
-            and ("PM" in message[:27] or "AM" in message[:27])
-        ):
-            return IS_SLASHES_M_D_Y_12
+            if (
+                message[0] != "["
+                and (message[1] == "/" or message[2] == "/")
+                and ("PM" in message[:27] or "AM" in message[:27])
+            ):
+                return IS_SLASHES_M_D_Y_12
 
-        if (
-            message[0] == "["
-            and (message[2] == "/" or message[3] == "/")
-            and ("PM" in message[:27] or "AM" in message[:27])
-        ):
-            return IS_SQUARE_BRACKET_SLASHES
+            if (
+                message[0] == "["
+                and (message[2] == "/" or message[3] == "/")
+                and ("PM" in message[:27] or "AM" in message[:27])
+            ):
+                return IS_SQUARE_BRACKET_SLASHES
+        except IndexError:
+            pass
 
         return ""
 

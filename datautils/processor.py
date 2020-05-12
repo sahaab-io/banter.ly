@@ -2,16 +2,16 @@ import string
 from collections import defaultdict
 from typing import List
 
+import constants.column_names as cn
 import emoji
+from datautils.stopwords import stopwords
 import pandas as pd
 import spacy
-from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from profanity_check import predict_prob as predict_prob_profane
-
-import constants.column_names as cn
+from typing import Set
 
 # from app import cache
 from constants.profanity_labels import CLEAN, QUESTIONABLE, PROFANE
@@ -28,17 +28,28 @@ from constants.topic_labels import PARTICIPANTS_LABEL, TOPIC_REDUCTION_MAP
 
 
 # @cache.memoize(timeout=3000)
-def process_data(df: pd.DataFrame) -> (List[pd.DataFrame], List[str]):
+def process_data(
+    df: pd.DataFrame, lang: str = "en"
+) -> (List[pd.DataFrame], List[str]):
     """
     Adds extra columns to the dataframe passed in and generates subsets of it based on the sender
     :param df: a pandas dataframe with columns Timestamp: pandas.Timestamp | Sender: str | Raw Text: str
+    :param lang: language code, default is 'en'
     :return: dfs:
     """
+    # Load the language specific processing libraries
+    nlp = None
+    stop_words = None
+    if lang == "en":
+        nlp = spacy.load("en_core_web_sm")
+        stop_words = stopwords(nlp, lang)
 
     df[cn.WORD_COUNT] = df[cn.RAW_TEXT].str.split(" ").apply(lambda l: len(l))
     df[cn.HOUR] = df[cn.TIMESTAMP].apply(lambda x: x.hour)
     df[cn.DAY] = df[cn.TIMESTAMP].apply(lambda x: x.dayofweek)
-    df[cn.CLEANED_TEXT] = df[cn.RAW_TEXT].apply(lambda x: __clean(x))
+    df[cn.CLEANED_TEXT] = df[cn.RAW_TEXT].apply(
+        lambda x: __clean(x, stop_words)
+    )
 
     sia = SentimentIntensityAnalyzer()
     df[cn.SENTIMENT_SCORE] = df[cn.RAW_TEXT].apply(
@@ -64,7 +75,7 @@ def process_data(df: pd.DataFrame) -> (List[pd.DataFrame], List[str]):
     )
 
     participants = list(df[cn.SENDER].unique())
-    nlp = spacy.load("en_core_web_sm")
+
     df[cn.ENTITIES] = df[cn.RAW_TEXT].apply(
         lambda x: __extract_named_entities(x, participants, nlp)
     )
@@ -77,7 +88,7 @@ def process_data(df: pd.DataFrame) -> (List[pd.DataFrame], List[str]):
     return df, dfs, participants
 
 
-def __clean(text):
+def __clean(text: str, stop_words: Set[str]) -> List[str]:
     tokens = word_tokenize(text)
     # convert to lower case
     tokens = [w.lower() for w in tokens]
@@ -93,8 +104,8 @@ def __clean(text):
                 valid_word = False
         if valid_word:
             words.append(word)
+
     # filter out stop words and any empty stragglers
-    stop_words = set(stopwords.words("english"))
     cleaned_words = [w for w in words if not (w in stop_words or w == "")]
     # return cleaned_words
     lemmatizer = WordNetLemmatizer()

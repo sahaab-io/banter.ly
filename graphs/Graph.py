@@ -8,7 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from emoji import UNICODE_EMOJI
 from plotly.subplots import make_subplots
-from wordcloud import STOPWORDS, WordCloud
+from wordcloud import WordCloud
 
 from constants.column_names import (
     TOTAL,
@@ -27,6 +27,7 @@ from constants.column_names import (
 )
 from constants.profanity_labels import PROFANE, QUESTIONABLE, CLEAN
 from constants.topic_labels import PARTICIPANTS_LABEL, SIMPLIFIED_LABELS
+from datautils.stopwords import stopwords
 from utils import random_color
 
 
@@ -232,7 +233,7 @@ class Graph:
 
     def word_cloud(self):
         wc = WordCloud(
-            stopwords=set(STOPWORDS),
+            stopwords=stopwords(),
             max_words=2500,
             color_func=lambda word, font_size, position, orientation, random_state, font_path: random_color(),
         )
