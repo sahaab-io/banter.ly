@@ -19,6 +19,13 @@ from constants.column_names import (
     CLEANED_TEXT,
     ENTITIES,
 )
+from constants.date_formats import (
+    IS_DASHED_Y_M_D_12,
+    IS_DASHED_Y_M_D_24,
+    IS_SQUARE_BRACKET_SLASHES,
+    IS_SLASHES_M_D_Y_12,
+    IS_SQUARE_BRACKET_Y_M_D_12,
+)
 from constants.messengers import WHATSAPP
 from services import counter_service, processed_data_service
 
@@ -52,94 +59,38 @@ class Parser:
         media_count_map = defaultdict(int)
 
         for line in raw_text.splitlines():
-            # This first line is problematic
-            if self.__invalid_whatapp_message(line):
+            # Skip over invalid whatsapp messages
+            if self.__invalid_whatsapp_message(line):
                 continue
 
-            # cell entries
-            sender = ""
-            time = None
-            # other variables
-            first_name_start = 0
-
-            # Case 1 example: "[2020-04-15, 11:04:12 PM] Amir: Plz"
-            # Case 2 example: "2020-04-16, 00:04 - Laila El-Farawi: Loool"
-            # Case 3 example: "2017-03-24, 4:57 p.m. - Sami: same"
-            # todo: implement stricter checking to prevent cases with phone numbers or postal codes
-            is_android_message_12 = (
-                line[0:4].isdigit() and line[4] == "-"
-            ) and (" p.m. - " in line[:27] or " a.m. - " in line[:27])
-
-            is_android_message_24 = (
-                line[0:4].isdigit()
-                and line[4] == "-"
-                and not (" p.m. - " in line[:27] or " a.m. - " in line[:27])
-            )
-
-            is_ios_message_12 = line[0] == "[" and (
-                "PM" in line[:27] or "AM" in line[:27]
-            )
-
-            if (
-                is_ios_message_12
-                or is_android_message_12
-                or is_android_message_24
-            ):
+            date_format = self.__extract_date_format(line)
+            if date_format:
                 # Set the indices
-                if is_ios_message_12:
-                    first_name_start = 26
-                elif is_android_message_12:
-                    if line[24] == " ":
-                        first_name_start = 25
-                    else:
-                        first_name_start = 24
-                elif is_android_message_24:
-                    first_name_start = 20
-
+                first_name_start = self.__extract_first_name_index(
+                    line, date_format
+                )
                 last_name_end = line.index(": ", first_name_start) + 2
 
                 # Skip the lines with media causing issues and tally them
                 if "<Media omitted>" in line:
                     media_count_map[
-                        self.__extract_firstname(line, first_name_start)
+                        self.__extract_sender(
+                            line, date_format, first_name_start
+                        )
                     ] += 1
                     continue
-
                 if entry is not None:
                     d.append(entry)
 
                 # Set the sender
-                if is_ios_message_12:
-                    if line[first_name_start - 2] == "]":
-                        first_name_start += 1
-                    sender = self.__extract_firstname(
-                        line, first_name_start - 1
-                    )
-                elif is_android_message_12 or is_android_message_24:
-                    sender = self.__extract_firstname(line, first_name_start)
+                sender = self.__extract_sender(
+                    line, date_format, first_name_start
+                )
 
                 # Extract the timestamp. The try catch is to account for the case where you copy pasted a message or the
                 # rare case where the message starts with a morphed timestamp
-                try:
-                    if is_ios_message_12:
-                        # print(line[first_name_start-1])
-                        if line[first_name_start - 2] == "]":
-                            first_name_start += 1
-                        time = datetime.datetime.strptime(
-                            line[0 : first_name_start - 2],
-                            "[%Y-%m-%d, %I:%M:%S %p]",
-                        )
-                    elif is_android_message_12:
-                        l = line[0 : first_name_start - 3].replace(".", "")
-                        time = datetime.datetime.strptime(
-                            line[0 : first_name_start - 3].replace(".", ""),
-                            "%Y-%m-%d, %I:%M %p",
-                        )
-                    elif is_android_message_24:
-                        time = datetime.datetime.strptime(
-                            line[0 : first_name_start - 3], "%Y-%m-%d, %H:%M"
-                        )
-                except ValueError:
+                time = self.__extract_time(line, date_format, first_name_start)
+                if not time:
                     entry[RAW_TEXT] = entry[RAW_TEXT] + line
                     continue
 
@@ -147,7 +98,7 @@ class Parser:
                 text = line[last_name_end : len(line)]
                 entry = {TIMESTAMP: time, SENDER: sender, RAW_TEXT: text}
 
-            # Case 3: It's a multiline text, in which case the entry value is not
+            # If it's a multiline text, in which case the entry value is not
             # reset and passed onto the next loop
             else:
                 # Sometimes the first line is problematic, this if statement is to account for that
@@ -244,7 +195,82 @@ class Parser:
         self.participants = list(self.parsed_df[SENDER].unique())
 
     @staticmethod
-    def __extract_firstname(message: str, start_pos: int) -> str:
+    def __invalid_whatsapp_message(message: str) -> bool:
+        return (
+            message == ""
+            or " are now secured with end-to-end encryption" in message
+            or "You created group " in message
+            or "You added " in message
+            or "You removed " in message
+            or " changed this group's icon" in message
+            or ' changed the subject from "' in message
+        )
+
+    @staticmethod
+    def __extract_date_format(message: str) -> str:
+        # todo: implement stricter checking to prevent cases with phone numbers or postal codes
+        if (message[0:4].isdigit() and message[4] == "-") and (
+            " p.m. - " in message[:27] or " a.m. - " in message[:27]
+        ):
+            return IS_DASHED_Y_M_D_12
+
+        if (message[0:4].isdigit() and message[4] == "-") and not (
+            " p.m. - " in message[:27] or " a.m. - " in message[:27]
+        ):
+            return IS_DASHED_Y_M_D_24
+
+        if (
+            message[0] == "["
+            and ("PM" in message[:27] or "AM" in message[:27])
+            and "/" not in message[:27]
+        ):
+            return IS_SQUARE_BRACKET_Y_M_D_12
+
+        if (
+            message[0] != "["
+            and (message[1] == "/" or message[2] == "/")
+            and ("PM" in message[:27] or "AM" in message[:27])
+        ):
+            return IS_SLASHES_M_D_Y_12
+
+        if (
+            message[0] == "["
+            and (message[2] == "/" or message[3] == "/")
+            and ("PM" in message[:27] or "AM" in message[:27])
+        ):
+            return IS_SQUARE_BRACKET_SLASHES
+
+        return ""
+
+    @staticmethod
+    def __extract_first_name_index(message: str, date_format: str) -> int:
+        if IS_SQUARE_BRACKET_Y_M_D_12 == date_format:
+            return 25
+
+        if IS_DASHED_Y_M_D_12 == date_format:
+            if message[24] == " ":
+                return 25
+            else:
+                return 24
+
+        if IS_DASHED_Y_M_D_24 == date_format:
+            return 20
+
+        if IS_SLASHES_M_D_Y_12 == date_format:
+            for index, value in enumerate(message):
+                if value == "-":
+                    return index + 2
+
+        if IS_SQUARE_BRACKET_SLASHES == date_format:
+            for index, value in enumerate(message):
+                if value == "]":
+                    return index + 2
+        return 0
+
+    @staticmethod
+    def __extract_sender(
+        message: str, date_format: str, start_pos: int
+    ) -> str:
         """
         Helper function for getting a person's name once we have the date
         :param message:
@@ -256,13 +282,39 @@ class Parser:
                 return message[start_pos:index]
 
     @staticmethod
-    def __invalid_whatapp_message(message: str) -> bool:
-        return (
-            message == ""
-            or " are now secured with end-to-end encryption" in message
-            or "You created group " in message
-            or "You added " in message
-            or "You removed " in message
-            or " changed this group's icon" in message
-            or ' changed the subject from "' in message
-        )
+    def __extract_time(message: str, date_format: str, first_name_start: int):
+        try:
+            if IS_SQUARE_BRACKET_Y_M_D_12 == date_format:
+                if message[first_name_start - 2] == "]":
+                    first_name_start += 1
+                    return datetime.datetime.strptime(
+                        message[0 : first_name_start - 2],
+                        "[%Y-%m-%d, %I:%M:%S %p]",
+                    )
+            elif IS_DASHED_Y_M_D_12 == date_format:
+                return datetime.datetime.strptime(
+                    message[0 : first_name_start - 3].replace(".", ""),
+                    "%Y-%m-%d, %I:%M %p",
+                )
+            elif IS_DASHED_Y_M_D_24 == date_format:
+                return datetime.datetime.strptime(
+                    message[0 : first_name_start - 3], "%Y-%m-%d, %H:%M"
+                )
+            elif IS_SLASHES_M_D_Y_12 == date_format:
+                return datetime.datetime.strptime(
+                    message[0 : first_name_start - 3], "%m/%d/%y, %I:%M %p"
+                )
+            elif IS_SQUARE_BRACKET_SLASHES == date_format:
+                try:
+                    return datetime.datetime.strptime(
+                        message[0 : first_name_start - 1],
+                        "[%m/%d/%y, %I:%M:%S %p]",
+                    )
+                except ValueError:
+                    return datetime.datetime.strptime(
+                        message[0 : first_name_start - 1],
+                        "[%d/%m/%Y, %I:%M:%S %p]",
+                    )
+        except ValueError:
+            pass
+        return None

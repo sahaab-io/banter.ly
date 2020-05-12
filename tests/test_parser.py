@@ -33,6 +33,56 @@ test_data = [
         "I'",
     ),
     (
+        "11/26/15, 2:16 PM - Amir The Sexy Awesome Dude MTL: Thanks bro👍🏼\n"
+        "1/26/15, 2:38 PM - Riad El Muriby: No problem !",
+        np.datetime64(datetime(2015, 11, 26, 14, 16)),
+        "Amir",
+        "Thanks bro👍🏼",
+        np.datetime64(datetime(2015, 1, 26, 14, 38)),
+        "Riad",
+        "No problem !",
+    ),
+    (
+        "1/2/15, 2:16 PM - Amir The Sexy Awesome Dude MTL: Thanks bro👍🏼\n"
+        "11/2/15, 2:38 PM - Riad El Muriby: No problem !",
+        np.datetime64(datetime(2015, 1, 2, 14, 16)),
+        "Amir",
+        "Thanks bro👍🏼",
+        np.datetime64(datetime(2015, 11, 2, 14, 38)),
+        "Riad",
+        "No problem !",
+    ),
+    (
+        "1/2/15, 2:16 PM - Amir The Sexy Awesome Dude MTL: Thanks bro👍🏼\n"
+        "11/26/15, 12:38 PM - Riad El Muriby: No problem !",
+        np.datetime64(datetime(2015, 1, 2, 14, 16)),
+        "Amir",
+        "Thanks bro👍🏼",
+        np.datetime64(datetime(2015, 11, 26, 12, 38)),
+        "Riad",
+        "No problem !",
+    ),
+    (
+        "[11/27/15, 12:43:46 AM] Loujaine A.: :/\n"
+        "[1/1/16, 9:17:31 PM] Amir Abushanab: Thnx 👍🏼",
+        np.datetime64(datetime(2015, 11, 27, 0, 43, 46)),
+        "Loujaine",
+        ":/",
+        np.datetime64(datetime(2016, 1, 1, 21, 17, 31)),
+        "Amir",
+        "Thnx 👍🏼",
+    ),
+    (
+        "[11/05/2020, 1:48:55 PM] Bashayer: What\n"
+        "[11/05/2020, 1:48:58 PM] Bashayer: It's 2",
+        np.datetime64(datetime(2020, 5, 11, 13, 48, 55)),
+        "Bashayer",
+        "What",
+        np.datetime64(datetime(2020, 5, 11, 13, 48, 58)),
+        "Bashayer",
+        "It's 2",
+    ),
+    (
         "2020-03-25, 12:15 - Amir Abushanab: [03-24, 22:05] Amir Abushanab: Legit problems need legit solutions.\n"
         "2020-03-25, 12:16 - Amir Abushanab: [03-24, 22:06] Amir Abushanab: Copy pasted texts are a bitch\n",
         np.datetime64(datetime(2020, 3, 25, 12, 15)),
