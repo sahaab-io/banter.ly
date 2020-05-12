@@ -178,19 +178,17 @@ class Parser:
         if len(self.parsed_df) == 0:
             raise ValueError("the parser has not parsed any dataframes")
 
-        if not self.media_count_map:
-            raise ValueError("the parser has not parsed a media count map")
-
         # Replace the participant names with their aliases
         self.parsed_df[SENDER] = self.parsed_df[SENDER].replace(
             participant_alias_mapping
         )
 
         # Do the same for the media count map and participant list
-        updated_media_count = {}
-        for name, count in self.media_count_map.items():
-            updated_media_count[participant_alias_mapping[name]] = count
-        self.media_count_map = updated_media_count
+        if self.media_count_map:
+            updated_media_count = {}
+            for name, count in self.media_count_map.items():
+                updated_media_count[participant_alias_mapping[name]] = count
+            self.media_count_map = updated_media_count
 
         self.participants = list(self.parsed_df[SENDER].unique())
 
