@@ -10,7 +10,7 @@ Banter.ly's goal is simply to be _the world's most comprehensive open source cha
 
 We want to make it easy and safe for anyone to get the most advanced insights from their text conversations with the click of a button
 
-See a live demo [here](http://34.105.74.179:8080/)
+Check out the [demo video](https://www.loom.com/share/d18297dbc3964fe9ad8f7801a5f386c9)
 
 ## Features
 Banter.ly currently only supports Whatsapp chat exports - more messengers and formats are on the [roadmap](https://github.com/sahaab-io/banter.ly/projects/2) (feature requests and cool ideas are welcome!)
@@ -44,13 +44,13 @@ poetry install
 cp .env.example .env
 
 # run the one-time setup script and download Spacy data
-python setup.py && python -m spacy download en_core_web_sm
+poetry run python setup.py && poetry run python -m spacy download en_core_web_sm
 
 # start the application
-python index.py
+poetry run python index.py
 ```
 
-If you don't wish to use [`Poetry`](https://python-poetry.org/) as your package manager, a `requirements.txt` file **without the dev dependencies** is also included
+If you don't wish to use [`Poetry`](https://python-poetry.org/) as your package manager, a `requirements.txt` file **without the dev dependencies** is also included, and you can just run the last two commands without prefixing them with `poetry run`
 
 ## Acknowledgements
 
